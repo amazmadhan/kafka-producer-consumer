@@ -1,0 +1,31 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: consumer
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring:
+          json:
+            # below course model class is not allowed as trusted package, so we need to set the header for trusted package to false and specify the type of the value
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: com.event.consumer.model.Course
+
+#            trusted:
+#              packages: com.event.producer.model
+#              packages: com.event.consumer.model,com.event.producer.model
+#              packages: '*'

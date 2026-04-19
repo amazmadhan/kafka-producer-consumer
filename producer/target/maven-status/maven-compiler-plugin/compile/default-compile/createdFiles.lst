@@ -1,0 +1,4 @@
+com\event\producer\model\Course.class
+com\event\producer\controller\KafkaController.class
+com\event\producer\ProducerApplication.class
+com\event\producer\service\KafkaService.class
