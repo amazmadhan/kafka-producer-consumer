@@ -1,0 +1,869 @@
+
+How many ways of architectures are there in the industry?
+Monolithic
+Microservices
+Event-driven
+Layered (MVC)
+Serverless
+
+-----------
+
+Monolith → internal events
+Microservices → distributed events
+
+Internal vs Distributed events:
+
+Internal events: Within same application
+Example: LoanService → triggers internal method → Risk logic
+Used in:
+	Monolithic apps
+	Spring events
+
+Distributed events: Across services
+Example: Loan Service → Kafka → Risk Service
+Used in:
+	Microservices
+	Banking integrations
+
+-----------
+
+REST can be monolithic & microservices?
+Yes
+
+Kafka is event-driven architecture?
+Yes, Kafka is based on pure event-driven architecture. 
+
+Event-driven can be monolithic & microservices?
+Yes
+
+-----------
+
+How many ways to build systems?
+Broadly 3 major styles:
+	1. Synchronous (REST mostly used)
+	2. Asynchronous (JMS, Queue, webflux (reactive programming))
+	3. Event-Driven (Kafka, JMS Topic)
+
+1. Synchronous (REST):
+	Immediate response
+	Example: Check loan eligibility
+
+2. Asynchronous (JMS / MQ):
+	Process later
+	Example: Loan approval workflow
+
+3. Event-Driven (Kafka, JMS Topic):
+	Systems react to events
+	One event → many services react
+	No direct calls → event triggers all
+	
+	Example: “Loan Approved” → triggers 5 systems
+	Loan Approved →	Email Service
+					SMS Service
+					Audit Service
+					Analytics Service
+					Fraud System
+
+	Event: Loan Approved → Systems react automatically
+	
+	JMS can implement with both Queue and Topic.
+		JMS Queue → task processing (not pure event broadcast)
+		JMS Topic → event-driven (broadcast)
+
+Can Queue be event-driven?
+Technically Yes, but practically:
+	Queue = work distribution
+	Topic = event broadcasting
+
+So Topic is more “event-driven” in nature
+Note: JMS + Kafka both can also combinely build the system
+
+-----------
+
+MOM (Message Oriented Middleware):
+	- Two API (application/services) can communicate with eachother without knowing them (or) loose coupling
+	- Producer and Consumer (with the middleman Broker)
+	- Brokers like RabbitMQ, Apache Kafka, etc..
+
+Synchronous calls:
+	REST (HTTP-based, public APIs)
+	SOAP (XML heavy, legacy banking systems)
+	gRPC (fast, binary, high performance internal microservices calls)
+	GraphQL (flexible queries, frontend-driven APIs)
+
+-----------
+
+REST:
+	REST = Request-Response Architecture
+	Also part of Synchronous Communication
+	Common in Microservices architecture
+
+JMS:
+	JMS = Event-driven Architecture (JMS can be event-driven)
+	JMS (Java Message Service) is a Java-based API used for sending and receiving messages between systems asynchronously.
+	JMS = API / interface
+	Brokers = implementation like IBM MQ / ActiveMQ
+	JMS itself does NOT handle fault tolerance
+	The broker (IBM MQ / ActiveMQ) handles it
+
+Kafka:
+	Kafka is strongly event-driven
+	Kafka is a Platform (has APIs)
+	Kafka is a broker system
+	Kafka is not traditional MQ, not based on JMS
+	Kafka is a Distributed Streaming Platform
+	Stores events and allows replay
+
+What does the term “message” mean?
+Message simply means, Data sent from one system to another asynchronously.
+Message is a generic concept used in:
+	JMS (API)
+	Brokers like IBM MQ
+	Apache Kafka
+
+-----------
+
+JMS vs REST API:
+| Feature          | JMS                 | REST          |
+| ---------------- | ------------------- | ------------- |
+| Type             | Async               | Sync          |
+| Dependency       | Loose               | Tight         |
+| Failure handling | Messages stored     | Request fails |
+| Performance      | High (non-blocking) | Depends       |
+
+REST vs JMS failure:
+REST flow:
+	Loan → Risk API (down) → FAIL immediately
+	No storage
+	Caller must retry
+
+JMS flow:
+	Loan → Queue → Stored
+	Risk service (down) → No issue
+	Later → Risk processes
+
+Key point:
+REST = depends on receiver availability NOW
+JMS = independent (decoupled)
+
+-----------
+
+JMS vs Kafka relationship:
+No direct relationship and No dependency between them.
+
+Is Kafka based on JMS?
+No
+
+JMS = Java API
+Kafka = independent platform
+
+| JMS               | Kafka       |
+| ----------------- | ----------- |
+| API               | Platform    |
+| Queue-based       | Log-based   |
+| Remove after read | Retain data |
+
+
+JMS vs Apache Kafka:
+| Feature           | JMS (IBM MQ, ActiveMQ)         | Kafka                        |
+| ----------------- | ------------------------------ | ---------------------------- |
+| Model             | Queue-based                    | Log-based streaming          |
+| Message retention | Until consumed                 | Stored for configurable time |
+| Replay            | No                          	 | Yes (big advantage)        	|
+| Throughput        | Medium                         | Very High                    |
+| Ordering          | Per queue                      | Per partition                |
+| Use case          | Banking, transactions          | Analytics, event streaming   |
+| Guarantee         | Strong (exactly-once possible) | At-least-once by default     |
+
+JMS = Deliver safely and remove
+Kafka = Store everything (Retain data) and allow replay
+
+What is “Replay” in Kafka?
+Replay = Read old messages again
+
+Example:
+	Loan events stored for 7 days
+	Bug found today
+	You can reprocess past 7 days data
+
+JMS cannot do this "replay"
+Kafka can do this "replay"
+
+Throughput means?
+Number of messages processed per second.
+10,000 loan messages/sec means, System processes 10,000 loans every second
+
+Example:
+10,000 msg/sec = throughput
+
+-----------
+
+REST vs JMS vs MQ vs Kafka:
+	REST = API
+	JMS = API (It's like JPA vs Hibernate analogy)
+	MQ = Broker (JMS implementation) = IBM MQ
+	Apache Kafka = Not JMS
+
+Note: Kafka is a separate technology and it's is a pure event-driven architecture.
+
+| Tech     | Type                           |
+| -------- | ------------------------------ |
+| REST     | Request-Response system        |
+| MQ (JMS) | Message-oriented middleware    |
+| Kafka    | Distributed streaming platform |
+
+-----------
+
+Popular JMS Implementations:
+	JMS is just an API.
+	You need a broker to implement the JMS rules.
+
+Brokers are:
+1, IBM MQ
+2, Apache ActiveMQ
+3, RabbitMQ
+
+4, Apache Kafka
+
+1, IBM MQ:
+	Enterprise-grade (Non-Open-source, paid application)
+	Very reliable
+	Used in banking
+	Handles transactions strongly
+	Throughput: Medium-high
+
+	Best for: Banking (payments, loans), financial systems
+	Reason: reliability + transactions
+
+2, Apache ActiveMQ:
+	Open-source
+	Easy to use
+	Good for small/medium systems
+
+	Best for: Internal enterprise apps
+	Reason: simple JMS
+	
+3, RabbitMQ (not pure JMS but widely used):
+	Open-source
+	Not pure JMS (AMQP-based)
+	Lightweight
+	High performance
+
+	Best for: Microservices, E-commerce, fast messaging
+	Reason: speed + flexibility
+
+4, Apache Kafka:
+	Open-source
+	Distributed streaming system
+	Handles millions of messages/sec
+
+	Best for: Big data, streaming, analytics (Netflix, LinkedIn, Uber)
+	Reason: huge data streaming
+
+-----------
+
+Crash Scenario:
+Producer → Broker → Consumer
+
+Case: Consumer crashes
+Step 1: Message stored in broker (disk)
+Step 2: Consumer comes back
+
+Broker stores message and automatically delivers when consumer is available
+Consumer doesn’t need to manually request, Producer needs to send the message to Consumer somehow.
+
+In JMS,
+Consumer ACKs to broker, NOT producer
+Consumer → ACK → Broker
+
+In Kafka,
+No traditional ACK like JMS
+Consumer manages offset
+Stores topics
+Manages partitions
+Handles consumers
+
+Producer → Kafka Broker → Topic → Consumer
+
+Producer -> Kafka (topic store) -> Consumer
+Producer -> topic A -> Consumer
+
+Kafka Topic = a file (log file)
+Message = a line in the file (record or line)
+Offset = position
+
+Offset 0 → Loan1
+Offset 1 → Loan2
+Offset 2 → Loan3
+
+Consumer behavior:
+	Reads message
+	Stores offset
+	Can re-read (replay)
+
+JMS (like IBM MQ):
+Producer → Queue → Consumer → ACK → Message removed
+
+Kafka:
+Producer → Topic → Consumer → Offset commit → Message stays
+
+Kafka:
+	Stores data like a log
+	Allows replay
+	No deletion after read (until retention ends)
+
+JMS:
+	Stores until consumed
+	Deletes after ACK
+
+How long message stays in queue?
+Depends on configuration
+
+Options:
+	Until consumed ✅ (common)
+	TTL (expiry time)
+	Manual cleanup
+
+Banking system, 
+	Messages may stay hours/days
+	Until processed
+
+-----------
+
+Disk vs Memory:
+| Type   | Meaning                       |
+| ------ | ----------------------------- |
+| Memory | RAM (fast, temporary)         |
+| Disk   | Hard drive (slow, persistent) |
+
+In JMS, by default, the important messages → stored in disk (persistent)
+Why?
+Crash safety
+
+Message types (JMS supports):
+	TextMessage
+	ObjectMessage
+	JSON (most common now)
+
+Note: No strict rule
+
+-----------
+
+In JMS (like IBM MQ):
+	Message stored in broker (disk)
+	Consumer doesn’t need to request
+	Broker pushes when available
+	Message removed only after ACK
+
+In Apache Kafka:
+	Message stored for configured time
+	Consumer can replay anytime
+	Consumer pulls data
+
+Your understanding now (summary):
+	Queue = one consumer
+	Topic = multiple consumers
+	JMS = reliable messaging
+	Kafka = scalable event streaming
+	Broker = brain handling everything
+
+-----------
+
+Queue and Topic:
+
+In JMS (like IBM MQ, Apache ActiveMQ):
+These are official JMS concepts,
+1, Queue (Point-to-Point)
+2, Topic (Publish-Subscribe)
+
+1, Use Queue when (Point-to-Point)
+   You want only one system to process
+   
+	Banking Examples:
+		Loan approval processing
+		Payment processing
+		Account update
+
+	Reason:
+		Must be processed only once
+		No duplication
+
+
+2, Use Topic when (Publish-Subscribe)
+   You want multiple systems to react
+
+	Banking Examples:
+		Loan Approved event
+		Transaction completed event
+
+	Systems:
+		SMS Service
+		Email Service
+		Fraud Detection
+		Audit Logs
+
+
+In RabbitMQ broker:
+ - Uses Queue
+ - Uses Exchange (similar to topic routing)
+
+In Apache Kafka:
+ - Only Topic
+ - No Queue concept (but behaves like one in some cases)
+
+Even though Kafka has only Topic, it can act like:
+1, Queue behavior
+2, Topic behavior
+
+1, Queue behavior (like JMS Queue):
+Use Consumer Group
+Only one consumer processes message
+
+2, Topic behavior (broadcast):
+Different consumer groups
+Each group gets message
+
+-----------
+
+Kafka behaves like both Queue and Topic:
+Even though Kafka has only Topic, it can act like:
+
+Queue behavior (like JMS Queue):
+	Use Consumer Group
+	Only one consumer processes message
+	
+	Queue = Task Assignment
+	Who will do this work?
+	Only one worker picks it
+
+Topic behavior (broadcast):
+	Different consumer groups
+	Each group gets message
+	
+	Topic = Announcement
+	Everyone listen to this event!
+	All interested systems react
+
+Real-Time Combined Example (Loan System):
+Step 1: Loan Created
+   → Queue (JMS)
+   → Risk Service processes
+
+Step 2: Loan Approved
+   → Topic (Kafka/JMS)
+   → Email, SMS, Audit, Analytics all react
+
+-----------
+
+In short,
+Queue is used for point-to-point communication where a message is consumed by only one consumer, typically for task processing like loan approval. 
+Topic is used for publish-subscribe where one event is consumed by multiple systems, like sending notifications or triggering analytics after a loan is approved. 
+In Kafka, only topics exist, but consumer groups allow it to behave like queues.
+
+-----------
+
+Core Difference of Queue vs Topic:
+
+1, Queue (JMS): 
+One message → One consumer
+Loan → Queue → Risk Service
+
+ - Load balancing
+ - Each message processed once
+
+2, Topic (JMS/Kafka):
+One message → Many consumers
+Loan Approved Event → Notification Service
+					  Analytics Service
+					  Audit Service
+ - Broadcast
+ - Multiple systems react
+
+-----------
+
+Can API be sync + async?
+Yes, it's very common in banking.
+
+Example:
+	REST API → receives request
+	Internally → sends JMS message
+	Client → REST API → JMS Queue → Async processing
+
+-----------
+
+When to use JMS?
+	You want loose coupling
+	Systems should not wait for each other
+	You need reliability (no data loss)
+	You are building event-driven systems
+
+Why JMS is used?
+Instead of calling another service directly (like REST), JMS lets you:
+	Send a message
+	Continue your work
+	Let the other system process it later
+
+This is very useful in:
+	Event-driven architecture
+	Microservices
+	High-performance systems
+
+Real-time Example:
+Imagine an order system:
+	User places an order
+	Order service sends a message to a queue
+	Payment service picks it later and processes
+
+Note: Even if the payment service is down, the message stays safe.
+
+Who stores this messages?
+	Broker like IBM MQ stores messages.
+
+Where are JMS messages stored? Cache (RAM) or “in air”?
+	They are stored inside the broker (disk + memory).
+	Loan service sends message → IBM MQ stores it persistently on disk → Even if system crashes → message is safe
+
+-----------
+
+Real Banking Example (Loan System):
+
+Loan Creation Flow:
+	User applies loan (REST API)
+	Loan service → sends JMS message
+	Downstream systems consume:
+		Credit Check Service
+		Risk Engine
+		Notification Service
+
+Note: Even if Risk Engine is down → message stays safe in queue.
+
+Where does the message “stay in queue”?
+Queue = storage inside the broker
+
+When you send a JMS message:
+It goes to a queue inside broker like IBM MQ
+
+Stored in:
+Memory (fast)
+Disk (persistent, safe)
+
+Think like this,
+Queue = Inbox (inside broker)
+
+Example:
+Loan Service → sends message
+IBM MQ Queue → stores message
+Risk service down → message waits safely
+
+How long the messages stays?
+Configurable (TTL – Time To Live)
+
+Can be:
+Few minutes
+Hours
+Days
+
+After TTL → message expires
+
+Can we retrieve anytime?
+yes, only until,
+	Message is consumed OR TTL expires.
+	No replay like Apache Kafka.
+
+-----------
+
+Simple Flow:
+	Producer → Queue → Consumer
+
+Key Components of JMS:
+1. Producer:
+	Sends messages
+	Example: Order Service
+
+2. Consumer:
+	Receives messages
+	Example: Payment Service
+
+3. Message Queue / Topic:
+	Stores messages temporarily
+
+There are 2 models:
+1, Queue (Point-to-Point):
+	One sender → One receiver
+	Example: Order → Payment
+
+2, Topic (Publish-Subscribe):
+	One sender → Multiple receivers
+	Example: Notification → Email + SMS + Analytics
+
+-----------
+
+How JMS works in Spring Boot?
+Spring Boot makes JMS very easy using @JmsListener.
+
+Flows:
+	1, Producer sends message → Queue
+	2, Broker stores message (like IBM MQ)
+	3, Consumer (@JmsListener) reads message
+
+Producer:
+@Autowired
+private JmsTemplate jmsTemplate;
+
+public void sendMessage() {
+    jmsTemplate.convertAndSend("loan.queue", "Loan Created: 123");
+}
+
+Consumer:
+@JmsListener(destination = "loan.queue")
+public void receiveMessage(String message) {
+    System.out.println("Received: " + message);
+}
+
+What Spring does internally?
+	Creates connection to broker (IBM MQ / ActiveMQ)
+	Converts object → message
+	Handles retries, transactions
+
+Is @JmsListener common for all brokers?
+Yes (for JMS-compatible brokers)
+
+Works with:
+	IBM MQ
+	Apache ActiveMQ
+
+Not directly for:
+	RabbitMQ (uses different API)
+	Kafka (uses @KafkaListener)
+
+-----------
+
+In Banking (Loan context):
+
+Use JMS when:
+	Payment processing
+	Loan disbursement
+	Transactions (critical)
+	Need guarantee + no duplication
+
+Use Kafka when:
+	Audit logs
+	User activity tracking
+	Fraud detection streams
+	Data pipelines
+
+-----------
+
+Why JMS over REST in real-time code:
+
+REST (Synchronous):
+	Loan Service → Call Risk API → Wait → Response
+
+Problems:
+	If Risk service is down → failure
+	Tight coupling
+	Slow response
+
+JMS (Asynchronous):
+	Loan Service → Send message → Continue
+	Risk Service → Process later
+
+Benefits:
+	Loose coupling
+	Fault tolerance
+	Better scalability
+
+-----------
+
+Who handles Fault tolerance in JMS?
+Handled by broker like IBM MQ.
+
+Features:
+	Persistent storage
+	Acknowledgement (ACK)
+	Retry mechanism
+	Dead Letter Queue (DLQ)
+	Transaction Support
+	Message Redelivery
+
+Example:
+Risk service fails:
+	Message retry happens
+	Still fails → moves to DLQ
+	Dev checks later
+
+-----------
+
+JMS Pros & Cons:
+
+JMS Advantages:
+	Reliable (no message loss)
+	Async (non-blocking)
+	Decoupled systems
+	Supports transactions
+
+JMS Disadvantages:
+	More setup (broker needed)
+	Debugging harder
+	Slight latency (not instant like REST)
+
+Decoupled:
+Sender & receiver independent
+
+Example: 
+Loan service doesn’t care if Risk is down
+
+Transactions:
+All-or-nothing processing
+
+Example:
+Debit account
+Send JMS message
+
+If message fails → rollback debit
+
+
+Why debugging is tough in JMS?
+Loan → Queue → Risk → Failure
+
+Because:
+	No direct call so no stack trace
+	Async flow:
+		Multiple consumers
+		Message delayed
+		Hard to trace message ID
+
+Real issues:
+	Message stuck in queue
+	Consumer not running
+	Duplicate processing
+
+You check:
+	Queue status
+	Logs
+	DLQ
+
+How to handle failures?
+	Dead Letter Queue (DLQ)
+	Logging message IDs
+	Retry mechanism
+
+Example:
+If message fails → goes to DLQ → you analyze later
+
+-----------
+
+REST Pros & Cons:
+
+REST Advantages:
+	Simple
+	Easy debugging
+	Immediate response
+
+REST Disadvantages:
+	Tight coupling
+	Failure-prone
+	Not scalable for heavy async flows
+
+Why easy debugging?
+Easy stack trace since it's a direct call
+sync calls - one after another
+Loan → Risk → ERROR
+
+
+Tight coupling:
+Loan depends on Risk availability
+
+Failure-prone:
+If Risk down → Loan fails
+
+Not scalable for async:
+System becomes slow
+
+Example:
+1 lakh loan requests
+All waiting for response because previous calls needs to get complete
+
+-----------
+
+Throughput numbers / Capacity / Volume Comparison (approx):
+| Tool     | Throughput (Messages/sec)		  | Best For              |
+| -------- | -------------------------------- | --------------------- |
+| IBM MQ   | Thousands (~5K–20K/sec)		  | Critical transactions |
+| ActiveMQ | Thousands (~5K–15K/sec)		  | General apps          |
+| RabbitMQ | Tens of thousands (~20K–50K/sec) | Microservices         |
+| Kafka    | Millions (~1M+ msg/sec)          | Streaming / Big data  |
+
+Note: Kafka is designed for huge scale
+
+-----------
+
+Why your project uses both JMS + Kafka?
+This is actually very common modern architecture.
+
+Loan System Example:
+JMS (IBM MQ): Needs guarantee + no data loss
+	Loan approval
+	Payment processing
+	Account updates
+
+Kafka: Needs high volume + replay
+	Loan events analytics
+	Customer behavior tracking
+	Fraud detection
+	
+	Example: 
+	CCTV recording. Events are stored → You can replay anytime
+
+Your project design:
+JMS (IBM MQ) → reliable transaction processing
+JMSListener + IBM MQ → for critical guaranteed processing
+
+Kafka → high-volume event streaming
+Kafka → for scalable event streaming
+
+This is modern banking architecture
+
+-----------
+
+Real-Time Loan Architecture:
+
+User → REST API (Loan Service)
+        ↓
+   JMS Queue (IBM MQ)
+        ↓
+Risk Service
+Payment Service
+Notification Service
+        ↓
+Kafka (events)
+        ↓
+Analytics / Fraud Detection
+
+-----------
+
+Interview Ready Answer for JMS:
+JMS is a Java-based messaging API used for asynchronous communication between systems. It helps in decoupling services by allowing producers to send messages to a queue and consumers to process them independently.
+
+What is Decoupling?
+Systems (producers and consumer) don’t depend on each other directly.
+
+Example:
+Without JMS (Tightly coupled)
+Loan → calls Risk → must be UP
+
+With JMS (Decoupled)
+Loan → Queue → Risk reads later
+
+Note: Loan doesn’t care if Risk is down
+
+In Spring Boot, JMS is implemented using JmsTemplate for sending and @JmsListener for consuming messages, typically integrated with brokers like IBM MQ or ActiveMQ.
+
+Compared to REST, JMS is asynchronous and more fault-tolerant since messages are stored in queues even if downstream systems are unavailable.
+
+In contrast, Kafka is a distributed event streaming platform that retains messages and allows replay, making it suitable for high-throughput use cases like analytics.
+
+In banking systems, JMS is preferred for transactional use cases like payments and loan processing due to its reliability, while Kafka is used for event streaming and analytics.
+
+-----------
+

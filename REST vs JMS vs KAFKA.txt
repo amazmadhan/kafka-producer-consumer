@@ -1,0 +1,96 @@
+
+Flow Comparison (All 3):
+
+REST (Sync):
+Loan Service → HTTP call → Risk API → Response → Loan continues
+
+ - Tight coupling
+ - Immediate response
+
+JMS (Async):
+Loan Service → Queue → Risk Service → Process later
+
+ - No waiting
+ - Decoupled
+
+Kafka (Event-driven):
+Loan Service → Topic → Multiple consumers react
+
+ - One event → many systems
+
+Key Understanding:
+| Concept  | REST            | JMS            | Kafka          |
+| -------- | --------------- | -------------- | -------------- |
+| Producer | REST Client     | Message Sender | Event Producer |
+| Consumer | REST Controller | @JmsListener   | @KafkaListener |
+| Waits?   | ✅ Yes           | ❌ No           | ❌ No           |
+| Response | Immediate       | Not required   | Not required   |
+
+Real Interview:
+In REST, the producer is the client making HTTP calls and the consumer is the server exposing endpoints using controllers. 
+Unlike JMS or Kafka where communication is asynchronous, REST is synchronous and tightly coupled, as the client waits for the server response.
+
+-----------
+
+REST – Full Flow (Producer + Consumer):
+Producer = Client (Loan Service calling API)
+Consumer = Server (Risk Service exposing API)
+
+Scenario:
+Loan Service → calls Risk Service → gets eligibility
+
+REST (Sync):
+
+1. Producer (Loan Service – REST Client):
+@Autowired
+private RestTemplate restTemplate;
+
+public String checkRisk(String loanId) { // loanId = 123
+    String url = "http://localhost:8081/risk/check/" + loanId;
+    return restTemplate.getForObject(url, String.class);
+}
+
+Note: This is blocking (waits for response)
+
+2. Consumer (Risk Service – REST API):
+@RestController
+@RequestMapping("/risk")
+public class RiskController {
+
+    @GetMapping("/check/{loanId}")
+    public String checkRisk(@PathVariable String loanId) {
+        // Business logic
+        return "LOW RISK for Loan: " + loanId;
+    }
+}
+Note: This is the server exposing API
+
+-----------
+
+JMS (Async):
+
+// Producer
+jmsTemplate.convertAndSend("loan.queue", "Loan123");
+
+// Consumer
+@JmsListener(destination = "loan.queue")
+public void process(String msg) {
+    System.out.println("Processing " + msg);
+}
+
+Note: Fire and forget
+
+-----------
+
+Kafka (Event Streaming):
+
+// Producer
+kafkaTemplate.send("loan-topic", "Loan123");
+
+// Consumer
+@KafkaListener(topics = "loan-topic")
+public void consume(String msg) {
+    System.out.println("Received " + msg);
+}
+
+-----------

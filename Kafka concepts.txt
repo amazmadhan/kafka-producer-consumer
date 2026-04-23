@@ -1,0 +1,276 @@
+
+Kafka:
+	- Eventdriven architecture
+	- Follows Publisher-Subscriber model
+	- Basically, its a Producer and Consumer model
+	- Direct connection would not be there between Producer and Consumer in Kafka
+	- Kafka Broker would be there in middle of the communication
+
+Producer - creates the data/message, connect to the Kafka server/broker and sends/publish the data to the Topic (Message Broker) but who will be consuming it is not known to the Producer.
+
+Topic is the place where messages will be stored which was sent by the producer.
+More than one topic can be stored in the Kafka server/broker.
+Multiple partioning inside each topic of the kafka server/broker which can handle large number of data in parallel.
+
+Consumer - whoever wants the data/message, connect to the Kafka server/broker and consume/subscribe the data from the Topic (Message Broker) but who was producing it is not known to the Consumer.
+Consumer gets connected to only one partition of each topic and consumes the message.
+Even consumer has multiple group. with the help of different consumer groups, can get connected to same topics and partitions.
+
+Producer	-->								Kafka Server / Kafka Broker							  <--		Consumer Group 1 (c1, c2, c3, etc)
+				(topics (topic 1, topic 2, etc) -> partitions (partioning 1, partioning 2, etc))			Consumer Group 2 (c1, c2, c3, etc)
+
+In simple,
+Producer sends the data through topic to the kafka server. Producer doesn't have any group concepts.
+Inside kafka server, there can be multiple topics. Each topic has multiple partitions.
+Consumer consumes the message with the help of each partioning of each topic through each consumer group. Consumer has group concepts.
+
+why in the same consumer group, the topics are not allowing to consume the message?
+bcoz it leads to data inconsistency if same consumer from same consumer group tries to consume the message
+
+How messages are published by the Producer to the partitions of the topics?
+through the Round-robin technique or publisher needs to explicitly mention the partitions key that where it would need to be placed inside the topic
+
+-----------
+
+How Kafka achieve fault tolerance?
+Inside Kafka Cluster, there will be Kafka Broker
+Inside Kafka Broker, there will be one or more Kafka Topic(s)
+
+Kafka Broker should have multiple replicate of Kafka Brokers because of fault tolerance.
+Fault Tolerance:
+If some failures happens, the system shouldn't fail, it means, inorder to not to affect the system request and response (still the application should run)
+The user should not affect at any point, so there will be a multiple replicate of Kafka Brokers (just same like replicating the servers)
+
+Inside Kafka Topic, for achieving the fault tolerance, there are 2 types,
+	1, Leader
+	2, Followers
+
+Metadata will be maintained by the "zookeeper". It will decide who will be the leader and other details.
+Leader should have the real messages.
+All the producer-consumer applications will talk to only to the Leader and not to the Followers.
+If some failures happens to the main broker, it redirects to the replicated broker/server and the current leader will change to follower and one of the followers will get changed to Leader. Then the producer-consumer applications will talk to leader as usual. This will be taking caring of zookeeper.
+
+So something has gone wrong, no need to worry, internally the zookeeper maintains the data that who will be the leader.
+This leader and follower details called as metadata which handles by Zookeeper and with the help of zookeeper, every traffics are properly forwarded to the respective partition. This is how we are achieving the fault tolerance.
+
+-----------
+
+Old Kafka (with Zookeeper):
+	Pre-Kafka 2.8 version.
+	Zookeeper Coordinator - External Coordination Service.
+	Kafka uses zookeeper mechanism externally to coordinte the services till Kafka 2.8.
+	
+	Zookeeper is the centralized system in the entire Kafka ecosystem (Zookeeper Coordinator)
+	Zookeeper handles maintaining the meta data like
+		- Broker metadata
+		- Leader Election
+		- Controller Node
+		- Health Monitoring
+	
+	In simple term,	
+		- how many brokers are there
+		- who is leader and who is followers
+		- how many partitions are there
+		- how many topics we have
+		- which are leader partitions and which are follower partitions
+
+Kafka depends on ZooKeeper for:
+	Broker registration
+	Leader election
+	Metadata storage (topics, partitions)
+
+After Kafka 2.8 version, we have something called as "KRaft" which is enhanced version of handling the entire services/system (without zookeeper you can manage it)
+
+-----------
+
+Modern Kafka (KRaft Mode):
+	Kafka 2.8+ versions.
+	Kafka Controller (Internal Controller).
+	Zookeeper-Free Kafka (No Zookeeper Needed).
+	Built-in Metadata
+	Leader Election
+
+From old to new. any chnages there?
+	Server side - changes required in properties 
+	Code side - similar in java code
+			  - small changes in properties file 
+
+Note:
+	Apache Kafka still supported Apache ZooKeeper up to version 2.8.
+	But starting from Kafka 2.8, a new architecture called KRaft (Kafka Raft Metadata mode) was introduced.
+	From Kafka 3.x onward, KRaft is production-ready, and ZooKeeper is being removed.
+	In Kafka 4.0, ZooKeeper is fully removed.
+
+| Version | Metadata Management             |
+| ------- | ------------------------------- |
+| ≤ 2.7   | ZooKeeper only                  |
+| 2.8     | ZooKeeper + KRaft (preview)     |
+| 3.x     | ZooKeeper + KRaft (recommended) |
+| 4.x     | KRaft only (ZooKeeper removed)  |
+
+| Version | Release Date      | Metadata Management                 | Year      | Status / Stability                 |
+| ------- | ----------------- | ----------------------------------- | --------- | ---------------------------------- |
+| ≤ 2.7   | Feb 9, 2021 (2.7) | ZooKeeper only                      | 2021      | ❌ Deprecated (not recommended)    |
+| 2.8     | June 8, 2021      | ZooKeeper + KRaft (preview)         | 2021      | ⚠️ Experimental KRaft              |
+| 3.0     | Sept 21, 2021     | ZooKeeper + KRaft 				    | 2021      | ⚠️ Early stable                    |
+| 3.1–3.5 | 2022–2023         | ZooKeeper + KRaft (recommended)     | 2022–2023 | ✅ Stable                          |
+| 3.9     | Nov 6, 2024       | ZooKeeper + KRaft (last ZK version) | 2024      | ✅ **Highly stable (Recommended)** |
+| 4.0     | Mar 18, 2025      | KRaft only (ZooKeeper removed)      | 2025      | 🚀 Latest major (Next-gen)         |
+| 4.1.x   | 2025–2026         | KRaft only                          | 2025–2026 | 🚀 Latest available                |
+
+
+-----------
+
+Features:
+real time streaming - fast and very less latency
+high throughput - handles millinons of messages at a time
+fault tolerance - if something goes wrong with the kafka server, it will maintain the backup and the data will not be lost
+loose coupling - interchanging the data without knowing it
+
+1 Producer : Multiple Consumers
+
+Example: Maven repository, Bus
+
+-----------
+
+Kafka is based on Event which is basically a "logging".
+
+How to download?
+https://kafka.apache.org/community/downloads/
+Download this version (kafka_2.13-3.9.0) and rename the folder to "kafka" from "kafka_2.13-3.9.0" because windows doesn't allow long format file name when running the cmd.
+
+We are working with Zookeeper now and not with the help of KRaft.
+
+-----------
+
+There are 2 paths you need to look at it and work on,
+1, C:\Softwares\kafka\config - it has important configuration files
+server.properties - broker configuration (default is broker.id=0)
+				  - listeners listens to the port 9092
+				  - partition configuration (num.partitions=1) -> it's a log partitions per topic. More partitions allow greater parallelism for consumption.
+zookeeper.properties - port at which the clients will connect (clientPort=2181)
+
+For easy run, copy these above 2 properties files from the config path and paste it in the bin/windows path but this is not a mandatory step to follow.
+
+2, C:\Softwares\kafka\bin\windows - it has important batch files which needs to be run and execute
+zookeeper-server-start.bat
+kafka-server-start.bat
+kafka-topics.bat
+
+-----------
+
+Go to cmd and run as administrator with all 3 commands,
+1, To start zookeeper server
+cd C:\Softwares\kafka\bin\windows>zookeeper-server-start.bat zookeeper.properties
+
+2.1, To start kafka server
+cd C:\Softwares\kafka\bin\windows>kafka-server-start.bat server.properties
+while executing the kafka server bat, we may get an 'wmic' error.
+to resolve this error, go and open this file kafka-server-start.bat, and remove wmic like inside if condition, have only this line 'set KAFKA_HEAP_OPTS=-Xmx1G -Xms1G'
+now run the same command, it will work.
+
+Can we have multiple kafka brokers?
+Yes
+
+Example of running multiple kafka brokers:
+Usually the brokers will be in different locations but for the example, we can have it in our same local machine and test.
+copy and paste the server.properties again and rename it 'server2.properties'
+open the server2.properties and update the 'broker.id' to 1
+already the previous broker runs in 9092 port, now uncomment the line of 9093 port (listeners=PLAINTEXT://:9093)
+even path of log file name needs to be renamed (log.dirs=/tmp/kafka-logs2
+
+2.2, To start another kafka server
+cd C:\Softwares\kafka\bin\windows\kafka-server-start.bat server2.properties
+it will run without having any problem.
+
+Zookeeper - started
+Kafka 1 and 2 - started
+Topics - started
+Partitions - done
+
+3, To create topics
+cd C:\Softwares\kafka\bin\windows>kafka-topics.bat --create --topic gayukafka --bootstrap-server localhost:9092 -- partitions 3
+cd C:\Softwares\kafka\bin\windows>kafka-topics.bat --create --topic madhankafka --bootstrap-server localhost:9092 -- partitions 2 -- replication-factor 1
+cd C:\Softwares\kafka\bin\windows>kafka-topics.bat --create --topic gayukafka --bootstrap-server localhost:9092 -- partitions 1 -- replication-factor 2
+
+If you try to create the topic with the existing created topic, it will not allow you to create and throw an error like the below,
+Error while executing topic command : Topic 'gayukafka' already exists.
+
+Note: 
+ - partitions number can be of any number, you can mention any number in that place.
+ - if you are using only one kafka broker, then it's not mandatory to use this -- replication-factor or you can use as <1> like -- replication-factor 1
+ - if you have created multiple kafka brokers and run it, then you must need to use -- replication-factor <with total number of running broker>
+
+You can figure out how many topics and partitions are configured for the respective topic name using below command,
+kafka-topics.bat --describe --topic madhankafka --bootstrap-server localhost:9092
+Topic: madhankafka      TopicId: kbwlYPgPQsKVdKhWKNRr-A PartitionCount: 1       ReplicationFactor: 1    Configs:
+        Topic: madhankafka      Partition: 0    Leader: 0       Replicas: 0     Isr: 0  Elr: N/A        LastKnownElr: N/A
+
+if you want all the list of topics created,
+cd C:\Softwares\kafka\bin\windows>kafka-topics.bat --list --bootstrap-server localhost:9092
+gayukafka
+madhankafka
+
+-----------
+
+Producer-Consumer:
+Producer publish the data into the Kafka Broker (topic)
+Consumer subscribe the data from the Kafka Broker (topic)
+Kafka Broker is the intermediator
+The consumer can be of muliple for that one message to consume from the producer
+Totally loosely coupled
+
+-----------
+
+prerequisites for producer-consumer codebases:
+Java - 17
+Maven
+Spring Boot - 3.5.9
+
+Add dependencies:
+	- Spring Web (starter)
+	- Spring for Apache Kafka (starter)
+
+Producer codebase:
+model class with the methods
+	- constuctor
+	- getter, setter
+	- toString 
+controller class
+	- url mapping
+	- post mapping to send/publish the course body
+	- call the service class to send the course as message
+service class
+	- annotate KafkaTemplate (autowired)
+	- method to send a message to topic 
+		- to publish, we need kafkaTemplate, use kafkaTemplate.send("madhankafka", "course", course);
+		- you can send topic, key and data/message -> in specific partition the data should be in.
+		- you can send topic and data/message -> in any partitions the data would be in.
+		- before sending a data/message, you need to create the topic. While creating topic, you may create partitions. This data would go specifically or randomly to the partition
+application.yaml
+	- server port (8081)
+	- kafka bootstrap-server (9092)
+	- while sending through network, we need to serialize the key (String) and value (Json object)
+
+-----------
+
+Consumer codebase:
+model class with the methods
+	- same model class of producer
+	- constuctor
+	- getter, setter
+	- toString
+controller class
+	- url mapping
+	- get mapping to get/subscribe the course body
+	- call the service class to get the course as message
+service class
+	- KafkaListener
+	- method to consume a message from topic
+		- to consume, we need KafkaListener, annotate on the method @KafkaListener(topics = "madhankafka", groupId = "consumer-group")
+		- every consumer has the group, when consumer can get connected to partitions and consume the data. we can have muliple consumer in one group which can be mentioned as like this (groupId = "consumer-group")
+application.yaml
+	- server port (8082)
+	- kafka bootstrap-server (9092)
+	- while sending through network, we need to deserialize the key (String) and value (Json object)
+	- which model path you need to deserialize, mention it
